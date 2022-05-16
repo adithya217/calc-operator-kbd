@@ -6,8 +6,8 @@ spec:
   # Supported operations are:
   # Basic math: add, subtract, multiply, divide
   # Advanced math: factorial, logarithm, exponent
-  # Trigonometric: sine, cosine, tangent, cotangent, secant, cosecant
-  # Hyperbolic: sineh, cosineh, tangenth, cotangenth, secanth, cosecanth
+  # Trigonometric: sine, cosine
+  # Hyperbolic: sineh, cosineh
   operation: add
   # No. of operands depends on the operation. Some operations can have only a fixed number of operands.
   operands:
