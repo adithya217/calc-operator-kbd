@@ -18,10 +18,14 @@ package v1
 
 import (
 	"calc-operator/constants"
+	"calc-operator/validators"
 	"fmt"
 	"runtime"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -83,4 +87,42 @@ func init() {
 		fmt.Printf("Calculator types init called from %s#%d\n", file, no)
 	}
 	SchemeBuilder.Register(&Calculator{}, &CalculatorList{})
+}
+
+func (calc *Calculator) SetDefaults() {
+	calc.setDefaultOperation()
+	calc.setDefaultOperands()
+}
+
+func (calc *Calculator) setDefaultOperation() {
+	if calc.Spec.Operation == "" {
+		calc.Spec.Operation = constants.MULTIPLY
+	}
+}
+
+func (calc *Calculator) setDefaultOperands() {
+	if len(calc.Spec.Operands) == 0 {
+		calc.Spec.Operands = []float64{1, 1}
+	}
+}
+
+func (r *Calculator) validate() error {
+	validator := validators.NewOperandsValidator(calculatorlog)
+	errorMessages, validationResult := validator.Validate(r.Spec.Operation, r.Spec.Operands)
+	if validationResult {
+		calculatorlog.Info("validated operands from CR succesfully!", "name", r.Name)
+		return nil
+	}
+
+	err := fmt.Errorf("validation failed for operands: %s", errorMessages)
+	calculatorlog.Error(err, "operands validation failed!", "name", r.Name)
+
+	operandsFieldPath := field.NewPath(constants.SPEC).Child(constants.OPERANDS)
+	operandsErr := field.Invalid(operandsFieldPath, r.Spec.Operands, err.Error())
+
+	var allErrors field.ErrorList
+	allErrors = append(allErrors, operandsErr)
+	return errors.NewInvalid(
+		schema.GroupKind{Group: "webapp.demo.calc-operator", Kind: "Calculator"},
+		r.Name, allErrors)
 }

@@ -1,6 +1,6 @@
 apiVersion: webapp.demo.calc-operator/v1
 kind: Calculator
 metadata:
-  name: calculator-sample
+  name: calculator-sample-empty
 spec:
   

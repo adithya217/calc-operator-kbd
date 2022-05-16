@@ -18,9 +18,9 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -28,13 +28,13 @@ import (
 	webappv1 "calc-operator/api/v1"
 	"calc-operator/models"
 	"calc-operator/services"
-	"calc-operator/validators"
 )
 
 // CalculatorReconciler reconciles a Calculator object
 type CalculatorReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme   *runtime.Scheme
+	Recorder record.EventRecorder
 }
 
 //+kubebuilder:rbac:groups=webapp.demo.calc-operator,resources=calculators,verbs=get;list;watch;create;update;patch;delete
@@ -61,26 +61,14 @@ func (r *CalculatorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 	logger.Info("parsed data from CR succesfully!")
 
-	// TODO: Use recorder to log events
-
-	resourceService := services.NewResourceService(logger, r.Client, ctx)
+	resourceService := services.NewResourceService(logger, r.Client, ctx, r.Recorder)
 	operation := calculatorModel.GetModel().Spec.Operation
 
-	// Validate the operation w.r.t operands
-	// TODO: Do this in webhook
-	validator := validators.NewOperationValidator(logger)
-	error_messages, validation_result := validator.Validate(operation, calculatorModel.GetModel().Spec.Operands)
-	if !validation_result {
-		err = fmt.Errorf("validation failed for operands: %s", error_messages)
-		logger.Error(err, "operand validation failed, can't reconcile!", "key", req.NamespacedName)
-		calculatorModel.MarkFail(err.Error())
-		resourceService.UpdateStatus(calculatorModel.GetModel())
-		return ctrl.Result{}, err
-	}
-	logger.Info("validated operands from CR succesfully!")
+	// resourceService.RecordEvent(calculatorModel.GetModel(), corev1.EventTypeNormal, "in progress",
+	// 	fmt.Sprintf("in progress for reconciling CR with name %s", calculatorModel.GetModel().Name))
 
 	service := services.NewCalculatorService(logger)
-	computation_result, err := service.Compute(operation, calculatorModel.GetModel().Spec.Operands)
+	computationResult, err := service.Compute(operation, calculatorModel.GetModel().Spec.Operands)
 	if err != nil {
 		logger.Error(err, "computation failed, can't reconcile!", "key", req.NamespacedName)
 		calculatorModel.MarkFail(err.Error())
@@ -88,9 +76,12 @@ func (r *CalculatorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
-	calculatorModel.MarkSuccess(computation_result)
+	calculatorModel.MarkSuccess(computationResult)
 	resourceService.UpdateStatus(calculatorModel.GetModel())
-	logger.Info("computation of CR succesful!", "result", computation_result)
+	logger.Info("computation of CR succesful!", "result", computationResult)
+
+	// resourceService.RecordEvent(calculatorModel.GetModel(), corev1.EventTypeNormal, "success",
+	// 	fmt.Sprintf("successfully reconciled CR with name %s", calculatorModel.GetModel().Name))
 
 	return ctrl.Result{}, nil
 }

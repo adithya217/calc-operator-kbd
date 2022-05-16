@@ -23,63 +23,63 @@ func NewCalculatorService(logger logr.Logger) ICalculatorService {
 }
 
 func (cs calculatorService) Compute(operation constants.Operation, values []float64) (float64, error) {
-	var computation_fn func([]float64) (float64, error)
+	var computationFn func([]float64) (float64, error)
 
 	switch operation {
 	case constants.ADD:
 		{
-			computation_fn = compute_addition
+			computationFn = computeAddition
 		}
 	case constants.SUBTRACT:
 		{
-			computation_fn = compute_subtraction
+			computationFn = computeSubtraction
 		}
 	case constants.MULTIPLY:
 		{
-			computation_fn = compute_multiplication
+			computationFn = computeMultiplication
 		}
 	case constants.DIVIDE:
 		{
-			computation_fn = compute_division
+			computationFn = computeDivision
 		}
 	case constants.FACTORIAL:
 		{
-			computation_fn = compute_factorial
+			computationFn = computeFactorial
 		}
 	case constants.LOGARITHM:
 		{
-			computation_fn = compute_logarithm
+			computationFn = computeLogarithm
 		}
 	case constants.EXPONENT:
 		{
-			computation_fn = compute_exponent
+			computationFn = computeExponent
 		}
 	case constants.SIN:
 		{
-			computation_fn = compute_sine
+			computationFn = computeSine
 		}
 	case constants.COS:
 		{
-			computation_fn = compute_cosine
+			computationFn = computeCosine
 		}
 	case constants.SINH:
 		{
-			computation_fn = compute_sine_hyperbolic
+			computationFn = computeSineHyperbolic
 		}
 	case constants.COSH:
 		{
-			computation_fn = compute_cosine_hyperbolic
+			computationFn = computeCosineHyperbolic
 		}
 	default:
 		{
-			return 0, fmt.Errorf(fmt.Sprintf("Unknown operation %s!", operation))
+			return 0, fmt.Errorf(fmt.Sprintf("unknown operation %s!", operation))
 		}
 	}
 
-	return computation_fn(values)
+	return computationFn(values)
 }
 
-func compute_addition(values []float64) (float64, error) {
+func computeAddition(values []float64) (float64, error) {
 	var result float64 = 0
 	for _, value := range values {
 		result += value
@@ -88,17 +88,20 @@ func compute_addition(values []float64) (float64, error) {
 	return result, nil
 }
 
-func compute_subtraction(values []float64) (float64, error) {
-	var result float64 = 0
-	for _, value := range values {
+func computeSubtraction(values []float64) (float64, error) {
+	var result float64 = values[0]
+	for index, value := range values {
+		if index == 0 {
+			continue
+		}
 		result -= value
 	}
 
 	return result, nil
 }
 
-func compute_multiplication(values []float64) (float64, error) {
-	var result float64 = 0
+func computeMultiplication(values []float64) (float64, error) {
+	var result float64 = 1
 	for _, value := range values {
 		result *= value
 	}
@@ -106,17 +109,20 @@ func compute_multiplication(values []float64) (float64, error) {
 	return result, nil
 }
 
-func compute_division(values []float64) (float64, error) {
-	var result float64 = 0
-	for _, value := range values {
+func computeDivision(values []float64) (float64, error) {
+	var result float64 = values[0]
+	for index, value := range values {
+		if index == 0 {
+			continue
+		}
 		result /= value
 	}
 
 	return result, nil
 }
 
-func compute_factorial(values []float64) (float64, error) {
-	var result uint64
+func computeFactorial(values []float64) (float64, error) {
+	var result uint64 = 1
 	operand := uint64(values[0])
 	for i := uint64(1); i <= operand; i++ {
 		result *= uint64(i) // mismatched types int64 and int
@@ -125,32 +131,32 @@ func compute_factorial(values []float64) (float64, error) {
 	return float64(result), nil
 }
 
-func compute_logarithm(values []float64) (float64, error) {
+func computeLogarithm(values []float64) (float64, error) {
 	number, base := values[0], values[1]
 	return math.Log2(number) / math.Log2(base), nil
 }
 
-func compute_exponent(values []float64) (float64, error) {
+func computeExponent(values []float64) (float64, error) {
 	number, power := values[0], values[1]
 	return math.Pow(number, power), nil
 }
 
-func compute_sine(values []float64) (float64, error) {
+func computeSine(values []float64) (float64, error) {
 	operand := values[0]
 	return math.Sin(operand), nil
 }
 
-func compute_cosine(values []float64) (float64, error) {
+func computeCosine(values []float64) (float64, error) {
 	operand := values[0]
 	return math.Cos(operand), nil
 }
 
-func compute_sine_hyperbolic(values []float64) (float64, error) {
+func computeSineHyperbolic(values []float64) (float64, error) {
 	operand := values[0]
 	return math.Sinh(operand), nil
 }
 
-func compute_cosine_hyperbolic(values []float64) (float64, error) {
+func computeCosineHyperbolic(values []float64) (float64, error) {
 	operand := values[0]
 	return math.Cosh(operand), nil
 }

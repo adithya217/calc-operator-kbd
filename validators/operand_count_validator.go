@@ -25,17 +25,17 @@ func newOperandCountValidator(ocType operandCountType, count int) iBaseOperandVa
 func (ocv operandCountValidator) validate(values []float64) ([]string, bool) {
 	switch ocv.ocType {
 	case min:
-		return ocv.validate_min(values)
+		return ocv.validateMin(values)
 	case max:
-		return ocv.validate_max(values)
+		return ocv.validateMax(values)
 	case exact:
-		return ocv.validate_exact(values)
+		return ocv.validateExact(values)
 	default:
 		return []string{fmt.Sprintf("unknown operandCountType %s!", ocv.ocType)}, false
 	}
 }
 
-func (ocv operandCountValidator) validate_min(values []float64) ([]string, bool) {
+func (ocv operandCountValidator) validateMin(values []float64) ([]string, bool) {
 	count := len(values)
 
 	if count < ocv.count {
@@ -45,7 +45,7 @@ func (ocv operandCountValidator) validate_min(values []float64) ([]string, bool)
 	return []string{}, true
 }
 
-func (ocv operandCountValidator) validate_max(values []float64) ([]string, bool) {
+func (ocv operandCountValidator) validateMax(values []float64) ([]string, bool) {
 	count := len(values)
 
 	if count > ocv.count {
@@ -55,7 +55,7 @@ func (ocv operandCountValidator) validate_max(values []float64) ([]string, bool)
 	return []string{}, true
 }
 
-func (ocv operandCountValidator) validate_exact(values []float64) ([]string, bool) {
+func (ocv operandCountValidator) validateExact(values []float64) ([]string, bool) {
 	count := len(values)
 
 	if count != ocv.count {
