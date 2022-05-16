@@ -1,0 +1,16 @@
+domain: demo.calc-operator
+layout:
+- go.kubebuilder.io/v3
+projectName: calc-operator-kbd
+repo: calc-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: demo.calc-operator
+  group: webapp
+  kind: Calculator
+  path: calc-operator/api/v1
+  version: v1
+version: "3"

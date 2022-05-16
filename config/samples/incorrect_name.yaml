@@ -1,0 +1,15 @@
+apiVersion: webapp.demo.calc-operator/v1
+kind: Calculator
+metadata:
+  name: "364b:15e1:97fb:ae49:afa4:1bff:ee0a:d6be"
+spec:
+  # Supported operations are:
+  # Basic math: add, subtract, multiply, divide
+  # Advanced math: factorial, logarithm, exponent
+  # Trigonometric: sine, cosine, tangent, cotangent, secant, cosecant
+  # Hyperbolic: sineh, cosineh, tangenth, cotangenth, secanth, cosecanth
+  operation: sub
+  # No. of operands depends on the operation. Some operations can have only a fixed number of operands.
+  operands:
+    - 4
+    - 2
